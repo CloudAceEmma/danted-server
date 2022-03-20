@@ -1,0 +1,49 @@
+#!/bin/bash
+os_centos=$(cat /etc/os-release | grep ID=\"centos\")
+os_debian=$(cat /etc/os-release | grep ID="debian")
+username=$1
+password=$2
+port=$3
+
+add_user() {
+	useradd -m -s /bin/bash $username
+	echo "$username:$password" > /tmp/pass.txt
+	chpasswd </tmp/pass.txt
+	rm /tmp/pass.txt
+}
+
+install_dante () {
+	if [[ $os_centos ]]
+	then
+		yum install wget -y
+		wget http://mirror.ghettoforge.org/distributions/gf/el/7/plus/x86_64/dante-1.4.1-176.9.x86_64.rpm
+		wget http://mirror.ghettoforge.org/distributions/gf/el/7/plus/x86_64/dante-server-1.4.1-176.9.x86_64.rpm
+		yum install dante-1.4.1-176.9.x86_64.rpm -y
+		yum install dante-server-1.4.1-176.9.x86_64.rpm -y
+	elif [[ $os_debian ]]
+	then
+		apt install wget -y
+		apt install dante-server -y
+	fi
+}
+
+config_dante () {
+	if [[ $os_debian ]]
+	then
+		cp /etc/pam.d/sshd /etc/pam.d/danted
+		wget https://gitlab.com/emma.du.signed/danted-server/-/raw/main/danted.conf -O /etc/danted.conf
+		sed -i "s|10086|$port|g" /etc/danted.conf 
+		systemctl enable danted --now
+	elif [[ $os_centos ]]
+	then
+		cp /etc/pam.d/sshd /etc/pam.d/sockd
+		wget https://gitlab.com/emma.du.signed/danted-server/-/raw/main/sockd.conf -O /etc/sockd.conf
+		sed -i "s|10086|$port|g" /etc/sockd.conf
+		systemctl enable sockd --now
+	fi		
+	echo "danted started"
+}
+
+add_user
+install_dante
+config_dante
