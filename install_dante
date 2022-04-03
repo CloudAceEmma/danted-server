@@ -31,13 +31,13 @@ config_dante () {
 	if [[ $os_debian ]]
 	then
 		cp /etc/pam.d/sshd /etc/pam.d/danted
-		wget https://gitlab.com/emma.du.signed/danted-server/-/raw/main/danted.conf -O /etc/danted.conf
+		wget https://github.com/CloudAceEmma/danted-server/raw/main/danted.conf -O /etc/danted.conf
 		sed -i "s|10086|$port|g" /etc/danted.conf 
 		systemctl enable danted --now
 	elif [[ $os_centos ]]
 	then
 		cp /etc/pam.d/sshd /etc/pam.d/sockd
-		wget https://gitlab.com/emma.du.signed/danted-server/-/raw/main/sockd.conf -O /etc/sockd.conf
+		wget https://github.com/CloudAceEmma/danted-server/raw/main/sockd.conf -O /etc/sockd.conf
 		sed -i "s|10086|$port|g" /etc/sockd.conf
 		systemctl enable sockd --now
 	fi		
