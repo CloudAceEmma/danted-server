@@ -5,7 +5,6 @@ username=$1
 password=$2
 port=$3
 
-# Add user
 add_user() {
 	useradd -m -s /bin/bash $username
 	echo "$username:$password" > /tmp/pass.txt
